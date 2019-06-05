@@ -30,6 +30,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using reNX.NXProperties;
 
@@ -151,7 +152,10 @@ namespace reNX {
 
         private string LoadString(uint id) {
             ushort* ptr = (ushort*) (_start + _stringBlock[id]);
-            Interlocked.CompareExchange(ref _strings[id], new string((sbyte*) (ptr + 1), 0, *ptr), null);
+            byte[] data = new byte[*ptr];
+            IntPtr _ptr = (IntPtr)(ptr + 1);
+            Marshal.Copy(_ptr, data, 0, data.Length);
+            Interlocked.CompareExchange(ref _strings[id], Encoding.UTF8.GetString(data), null);
             return _strings[id];
         }
 
